@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Master - Ultimate Football Universe</title>
+    <title>World Master - Football Universe</title>
     <style>
         :root {
             --bg-deep: #070a13;
             --bg-card: #101726;
             --bg-hover: #1a243b;
             --accent: #10b981;
-            --accent-glow: rgba(16, 185, 129, 0.25);
             --danger: #ef4444;
             --warning: #f59e0b;
             --info: #3b82f6;
@@ -19,346 +18,156 @@
             --border: #1e293b;
         }
         * { box-sizing: border-box; }
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-deep);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 15px 25px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        }
-        .club-stats { display: flex; gap: 12px; font-size: 0.85rem; }
-        .stat-badge {
-            background: var(--bg-deep);
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
+        body { font-family: system-ui, sans-serif; background-color: var(--bg-deep); color: var(--text-main); margin: 0; padding: 15px; }
+        header { display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); border: 1px solid var(--border); padding: 15px; border-radius: 12px; margin-bottom: 15px; }
+        .club-stats { display: flex; gap: 8px; font-size: 0.8rem; flex-wrap: wrap; }
+        .stat-badge { background: var(--bg-deep); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
         .stat-badge span { color: var(--accent); font-weight: bold; }
-        
-        nav {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
-        nav button {
-            background: var(--bg-card);
-            color: var(--text-muted);
-            border: 1px solid var(--border);
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-        nav button.active, nav button:hover {
-            background: var(--accent);
-            color: #fff;
-            border-color: var(--accent);
-            box-shadow: 0 0 12px var(--accent-glow);
-        }
+        nav { display: flex; gap: 6px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+        nav button { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; white-space: nowrap; }
+        nav button.active, nav button:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
-        th { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        tr:hover td { background-color: var(--bg-hover); }
-
-        button.action-btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.15s;
-        }
-        button.action-btn:hover { filter: brightness(1.15); }
-        button.secondary-btn {
-            background: transparent;
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            padding: 8px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        button.secondary-btn:hover { background: var(--bg-hover); }
-
-        select, input, textarea {
-            background: var(--bg-deep);
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            padding: 10px 12px;
-            border-radius: 6px;
-            font-family: inherit;
-            width: 100%;
-            margin-top: 5px;
-            margin-bottom: 15px;
-        }
-
-        .chat-box {
-            background: var(--bg-deep);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 15px;
-            height: 220px;
-            overflow-y: auto;
-            font-family: monospace;
-            font-size: 0.85rem;
-            margin-bottom: 15px;
-        }
-        .aya-msg { color: var(--info); margin-bottom: 8px; }
-        .match-log {
-            background: var(--bg-deep);
-            padding: 15px;
-            border-radius: 8px;
-            height: 240px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-            border: 1px solid var(--border);
-            margin-top: 15px;
-            line-height: 1.5;
-        }
-        .highlight-event { color: #facc15; font-weight: bold; }
-        .goal-event { color: var(--accent); font-weight: bold; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+        th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); }
+        th { color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; }
+        button.action-btn { background: var(--accent); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        select, input, textarea { background: var(--bg-deep); color: var(--text-main); border: 1px solid var(--border); padding: 8px; border-radius: 6px; width: 100%; margin-top: 5px; margin-bottom: 10px; }
+        .match-log { background: var(--bg-deep); padding: 10px; border-radius: 6px; height: 180px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; border: 1px solid var(--border); margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <!-- WORLD SELECTOR / CREATION MODAL -->
-    <div id="universe-screen" style="max-width: 600px; margin: 40px auto;" class="card">
-        <h2 style="margin-top:0; color:var(--accent);">🌍 World Master Universe Hub</h2>
-        <p style="color:var(--text-muted); font-size:0.9rem;">Connected to Live Cloud Server via Render.</p>
+    <!-- UNIVERSE HUB -->
+    <div id="universe-screen" style="max-width: 500px; margin: 20px auto;" class="card">
+        <h2 style="margin-top:0; color:var(--accent);">🌍 World Master Hub</h2>
+        <p style="color:var(--text-muted); font-size:0.85rem;">Log in with your Manager & Club name to resume your game safely without resetting.</p>
         
-        <div style="margin-top: 20px;">
-            <h3>Create a New World (Admin Portal)</h3>
-            <label>World Name</label>
-            <input type="text" id="new-world-name" placeholder="e.g. Global Super League">
-            <label>Admin Creator Name</label>
-            <input type="text" id="admin-name" placeholder="e.g. Spider23qX">
-            <button class="action-btn" onclick="createWorld()">Initialize Cloud Universe</button>
+        <div>
+            <h3>Create Universe (Admin)</h3>
+            <input type="text" id="new-world-name" placeholder="World Name">
+            <input type="text" id="admin-name" placeholder="Your Admin Name">
+            <button class="action-btn" onclick="createWorld()">Create Universe</button>
         </div>
 
-        <hr style="border-color:var(--border); margin: 25px 0;">
+        <hr style="border-color:var(--border); margin: 20px 0;">
 
-        <h3>Available Cloud Universes</h3>
-        <div id="world-list-container">
-            Loading universes from server...
-        </div>
+        <h3>Active Universes</h3>
+        <div id="world-list-container">Loading universes...</div>
     </div>
 
-    <!-- MAIN APP DASHBOARD -->
+    <!-- MAIN APP -->
     <div id="main-app-screen" style="display: none;">
         <header>
             <div>
-                <h1 id="header-club-name" style="margin:0; font-size: 1.4rem;">Apex FC</h1>
-                <span id="header-world-info" style="color: var(--text-muted); font-size: 0.85rem;">World: Loading...</span>
+                <h1 id="header-club-name" style="margin:0; font-size: 1.2rem;">Club</h1>
+                <span id="header-world-info" style="color: var(--text-muted); font-size: 0.75rem;">World Info</span>
             </div>
             <div class="club-stats">
-                <div class="stat-badge">Treasury: <span id="club-budget">£35M</span></div>
-                <div class="stat-badge">Stadium Cap: <span id="stadium-cap">40,000</span></div>
+                <div class="stat-badge">Budget: <span id="club-budget">£0</span></div>
                 <div class="stat-badge">Matchday: <span id="matchday-counter">1</span></div>
             </div>
         </header>
 
         <nav>
-            <button class="nav-btn active" onclick="switchTab('dashboard', event)">Club Hub</button>
-            <button class="nav-btn" onclick="switchTab('match', event)">Match & Tournaments</button>
-            <button class="nav-btn" onclick="switchTab('transfers', event)">Transfer & Coaches</button>
-            <button class="nav-btn" onclick="switchTab('stadium', event)">Stadium & Facilities</button>
-            <button class="nav-btn" onclick="switchTab('aya', event)">🤖 Aya & FA Laws</button>
-            <button class="nav-btn" onclick="switchTab('admin', event)" id="admin-nav-tab" style="display:none; color:var(--warning);">👑 Admin Dashboard</button>
+            <button class="nav-btn active" onclick="switchTab('dashboard', event)">Hub</button>
+            <button class="nav-btn" onclick="switchTab('table', event)">League Table</button>
+            <button class="nav-btn" onclick="switchTab('match', event)">Universal Matches</button>
+            <button class="nav-btn" onclick="switchTab('transfers', event)">Market</button>
+            <button class="nav-btn" onclick="switchTab('admin', event)" id="admin-nav-tab" style="display:none; color:var(--warning);">👑 Admin</button>
         </nav>
 
-        <!-- CLUB DASHBOARD TAB -->
         <div id="dashboard" class="tab-content active">
-            <div class="grid-2">
-                <div class="card" style="margin:0;">
-                    <h3>Squad Roster</h3>
-                    <table>
-                        <thead>
-                            <tr><th>Name</th><th>Pos</th><th>Age</th><th>OVR</th><th>Wage</th></tr>
-                        </thead>
-                        <tbody id="squad-list"></tbody>
-                    </table>
-                </div>
-                <div class="card" style="margin:0;">
-                    <h3>Coaching Staff & Management</h3>
-                    <p>Head Coach: <strong id="coach-name">Unassigned</strong> (<span id="coach-rating">0</span> Rating)</p>
-                    <button class="secondary-btn" style="margin-top:10px;" onclick="switchTab('transfers', event)">Hire Coaches</button>
-                </div>
+            <div class="card">
+                <h3>Squad Roster</h3>
+                <table>
+                    <thead><tr><th>Name</th><th>Pos</th><th>OVR</th></tr></thead>
+                    <tbody id="squad-list"></tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Head Coach</h3>
+                <p><span id="coach-name">Unassigned</span> (Rating: <span id="coach-rating">0</span>)</p>
             </div>
         </div>
 
-        <!-- MATCH & TOURNAMENTS TAB -->
+        <div id="table" class="tab-content">
+            <div class="card">
+                <h3>Shared League Standings</h3>
+                <table>
+                    <thead><tr><th>Pos</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Pts</th></tr></thead>
+                    <tbody id="league-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
         <div id="match" class="tab-content">
             <div class="card" style="text-align: center;">
-                <h2 id="fixture-title" style="margin-top:0;">Tournament Matchday</h2>
-                <p id="active-tournament-label" style="color:var(--text-muted);">Current Competition: Loading...</p>
-                <button class="action-btn" id="sim-btn" style="font-size: 1rem; padding: 12px 28px;" onclick="simulateMatch()">Simulate Fixture Match</button>
-                <div class="match-log" id="match-log">[System] Ready for kickoff under Aya monitoring.</div>
+                <h3 id="active-tournament-label">Competition</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Simulate the universal matchday for all clubs in the universe.</p>
+                <button class="action-btn" onclick="simulateUniversalMatchday()">Simulate Universal Matchday</button>
+                <div class="match-log" id="match-log">Awaiting matchday execution...</div>
             </div>
         </div>
 
-        <!-- TRANSFERS & COACHES TAB -->
         <div id="transfers" class="tab-content">
             <div class="card">
-                <h3>Aya Regulated Live Server Market</h3>
+                <h3>Shared Transfer Market</h3>
                 <table>
-                    <thead>
-                        <tr><th>Name</th><th>Role / Pos</th><th>Age</th><th>OVR / Rating</th><th>Asking Price</th><th>Action</th></tr>
-                    </thead>
+                    <thead><tr><th>Name</th><th>Role</th><th>OVR</th><th>Price</th><th>Action</th></tr></thead>
                     <tbody id="transfer-list"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- STADIUM & FACILITIES TAB -->
-        <div id="stadium" class="tab-content">
-            <div class="grid-2">
-                <div class="card" style="margin:0;">
-                    <h3>Stadium Infrastructure</h3>
-                    <p>Current Capacity: <strong id="stadium-size">40,000</strong> Seats</p>
-                    <button class="action-btn" style="margin-top:15px;" onclick="upgradeStadium()">Expand Stadium (+10,000 Seats) - £10M</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- AYA & FA LAWS TAB -->
-        <div id="aya" class="tab-content">
-            <div class="grid-2">
-                <div class="card" style="margin:0;">
-                    <h3>🤖 Aya — FA Regulatory AI</h3>
-                    <div class="chat-box" id="aya-chat-box">
-                        <div class="aya-msg"><strong>[Aya FA Bot]:</strong> Connected to live cloud server. All deals are locked under strict FA oversight.</div>
-                    </div>
-                    <input type="text" id="aya-query-input" placeholder="Ask Aya about club financial status...">
-                    <button class="action-btn" onclick="queryAya()">Consult Aya</button>
-                </div>
-                <div class="card" style="margin:0;">
-                    <h3>World Laws & Governance</h3>
-                    <div id="world-laws-display" style="background:var(--bg-deep); padding:15px; border-radius:8px; border:1px solid var(--border); font-size:0.9rem; line-height:1.5;">
-                        Loading regulations...
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ADMIN DASHBOARD TAB -->
         <div id="admin" class="tab-content">
-            <div class="grid-2">
-                <div class="card" style="margin:0;">
-                    <h3 style="color:var(--warning);">👑 Admin Market Injector</h3>
-                    <label>Entity Name</label>
-                    <input type="text" id="admin-p-name" placeholder="e.g. Lamine Yamal Jr">
-                    <label>Position / Role</label>
-                    <select id="admin-p-pos">
-                        <option>ST</option><option>RW</option><option>LW</option><option>CAM</option><option>CM</option><option>CB</option><option>GK</option><option>Head Coach</option>
-                    </select>
-                    <label>Overall / Rating</label>
-                    <input type="number" id="admin-p-ovr" value="84">
-                    <label>Asking Price (£)</label>
-                    <input type="number" id="admin-p-price" value="15000000">
-                    <button class="action-btn" style="background:var(--warning); color:#000;" onclick="adminAction('inject')">Inject into Server Market</button>
-                </div>
-                <div class="card" style="margin:0;">
-                    <h3 style="color:var(--warning);">📰 Tournament & Gazette</h3>
-                    <label>Tournament Name</label>
-                    <input type="text" id="admin-tourn-name" placeholder="e.g. World Super Cup">
-                    <button class="action-btn" style="background:var(--warning); color:#000; margin-bottom:15px;" onclick="adminAction('tournament')">Launch Tournament</button>
-                    <label>Draft Newsletter</label>
-                    <textarea id="admin-newsletter-text" rows="2" placeholder="Write news update..."></textarea>
-                    <button class="action-btn" style="background:var(--warning); color:#000;" onclick="adminAction('newsletter')">Publish Newsletter</button>
-                </div>
+            <div class="card" style="border-color: var(--warning);">
+                <h3 style="color:var(--warning);">👑 Admin Controls</h3>
+                <button class="action-btn" style="background:var(--danger); width:100%; margin-bottom:15px;" onclick="deleteUniverse()">Delete This Universe</button>
+                
+                <label>Inject Market Item</label>
+                <input type="text" id="admin-p-name" placeholder="Player Name">
+                <select id="admin-p-pos"><option>ST</option><option>RW</option><option>CM</option><option>CB</option><option>GK</option><option>Head Coach</option></select>
+                <input type="number" id="admin-p-ovr" value="84" placeholder="OVR">
+                <input type="number" id="admin-p-price" value="15000000" placeholder="Price">
+                <button class="action-btn" style="background:var(--warning); color:#000;" onclick="adminAction('inject')">Inject Item</button>
             </div>
         </div>
     </div>
 
     <script>
         const API_URL = "https://world-master-backend.onrender.com";
-
-        let appState = {
-            currentWorld: null,
-            clubKey: null,
-            isAdmin: false
-        };
+        let appState = { currentWorld: null, clubKey: null, isAdmin: false };
 
         async function fetchUniverses() {
-            try {
-                let res = await fetch(`${API_URL}/api/universes`);
-                let universes = await res.json();
-                let container = document.getElementById('world-list-container');
-                let html = '';
-                universes.forEach(w => {
-                    html += `<div style="background:var(--bg-deep); padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <strong>${w.name}</strong> <span style="font-size:0.8rem; color:var(--text-muted);">(Admin: ${w.admin})</span><br>
-                            <span style="font-size:0.8rem; color:var(--accent);">Active: ${w.activeTournament}</span>
-                        </div>
-                        <div>
-                            <button class="action-btn" onclick="joinWorld('${w.id}')">Join World</button>
-                        </div>
-                    </div>`;
-                });
-                container.innerHTML = html;
-            } catch (err) {
-                document.getElementById('world-list-container').innerText = "Error connecting to cloud server.";
-            }
+            let res = await fetch(`${API_URL}/api/universes`);
+            let universes = await res.json();
+            let html = '';
+            universes.forEach(w => {
+                html += `<div style="background:var(--bg-deep); padding:10px; border-radius:6px; border:1px solid var(--border); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <div><strong>${w.name}</strong> <span style="font-size:0.75rem; color:var(--text-muted);">(Admin: ${w.admin})</span></div>
+                    <button class="action-btn" onclick="joinWorld('${w.id}')">Enter Club</button>
+                </div>`;
+            });
+            document.getElementById('world-list-container').innerHTML = html || "No universes found.";
         }
 
         async function createWorld() {
             let name = document.getElementById('new-world-name').value;
             let admin = document.getElementById('admin-name').value;
-            if(!name || !admin) { alert("Provide world name and admin name!"); return; }
-
-            let res = await fetch(`${API_URL}/api/universes`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, admin })
-            });
-            let data = await res.json();
-            if(data.success) {
-                alert("Universe initialized on the server!");
-                fetchUniverses();
-            }
+            if(!name || !admin) return alert("Fill out fields.");
+            await fetch(`${API_URL}/api/universes`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name, admin}) });
+            fetchUniverses();
         }
 
         async function joinWorld(worldId) {
-            let managerName = prompt("Enter your Manager Name:", "Manager_" + Math.floor(Math.random()*1000));
-            let clubName = prompt("Enter your Club Name:", managerName + " FC");
+            let managerName = prompt("Enter your Manager Name:");
+            let clubName = prompt("Enter your Club Name:");
             if(!managerName || !clubName) return;
 
             let res = await fetch(`${API_URL}/api/universes/${worldId}/join`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ managerName, clubName })
             });
             let data = await res.json();
@@ -381,120 +190,97 @@
             document.getElementById('header-club-name').innerText = club.name;
             document.getElementById('header-world-info').innerText = `World: ${world.name} • Manager: ${club.owner}`;
             document.getElementById('club-budget').innerText = '£' + (club.budget / 1000000).toFixed(1) + 'M';
-            document.getElementById('stadium-cap').innerText = club.stadiumCap.toLocaleString();
-            document.getElementById('stadium-size').innerText = club.stadiumCap.toLocaleString();
-            document.getElementById('matchday-counter').innerText = club.matchday;
+            document.getElementById('matchday-counter').innerText = world.matchday;
             document.getElementById('coach-name').innerText = club.coach.name;
             document.getElementById('coach-rating').innerText = club.coach.rating;
-            document.getElementById('active-tournament-label').innerText = `Current Competition: ${world.activeTournament}`;
+            document.getElementById('active-tournament-label').innerText = world.activeTournament;
 
-            let squadHtml = '';
-            club.squad.forEach(p => {
-                squadHtml += `<tr><td><strong>${p.name}</strong></td><td>${p.pos}</td><td>${p.age}</td><td><span style="color:var(--accent); font-weight:bold;">${p.ovr}</span></td><td>£${(p.wage||20000).toLocaleString()}/w</td></tr>`;
-            });
-            document.getElementById('squad-list').innerHTML = squadHtml;
+            // Squad list
+            document.getElementById('squad-list').innerHTML = club.squad.map(p => `<tr><td>${p.name}</td><td>${p.pos}</td><td>${p.ovr}</td></tr>`).join('');
 
-            let marketHtml = '';
-            world.transferMarket.forEach(item => {
-                marketHtml += `<tr><td><strong>${item.name}</strong></td><td>${item.pos}</td><td>${item.age}</td><td>${item.ovr}</td><td>£${(item.price/1000000).toFixed(1)}M</td><td><button class="action-btn" onclick="buyMarketItem(${item.id})">Sign Deal</button></td></tr>`;
-            });
-            document.getElementById('transfer-list').innerHTML = marketHtml;
+            // Transfer market
+            document.getElementById('transfer-list').innerHTML = world.transferMarket.map(item => `<tr><td>${item.name}</td><td>${item.pos}</td><td>${item.ovr}</td><td>£${(item.price/1000000).toFixed(1)}M</td><td><button class="action-btn" onclick="buyItem(${item.id})">Sign</button></td></tr>`).join('');
 
-            document.getElementById('world-laws-display').innerHTML = `<strong>FA Governing Laws:</strong><br><pre style="white-space:pre-wrap; font-family:inherit; margin:5px 0;">${world.laws}</pre><br><hr style="border-color:var(--border)"><strong>Gazette:</strong><br>` + world.newsletters.map(n => `<div style="margin-top:5px; color:var(--text-muted);">${n}</div>`).join('');
+            // League Table
+            let sortedClubs = Object.values(world.clubs).sort((a,b) => b.points - a.points || (b.gf - b.ga) - (a.gf - a.ga));
+            document.getElementById('league-table-body').innerHTML = sortedClubs.map((c, index) => `<tr><td>${index+1}</td><td><strong>${c.name}</strong></td><td>${c.played}</td><td>${c.won}</td><td>${c.drawn}</td><td>${c.lost}</td><td><strong>${c.points}</strong></td></tr>`).join('');
+
+            // Match logs
+            document.getElementById('match-log').innerText = world.matchesLog.join('\n\n') || "No matches simulated yet.";
         }
 
-        async function buyMarketItem(itemId) {
+        async function simulateUniversalMatchday() {
+            let res = await fetch(`${API_URL}/api/universes/${appState.currentWorld.id}/simulate`, { method: 'POST' });
+            let data = await res.json();
+            if(data.success) {
+                appState.currentWorld = data.world;
+                refreshGameUI();
+                alert("Matchday successfully simulated across the server!");
+            } else {
+                alert(data.error);
+            }
+        }
+
+        async function buyItem(itemId) {
             let res = await fetch(`${API_URL}/api/universes/${appState.currentWorld.id}/transfer`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ clubKey: appState.clubKey, itemId })
             });
             let data = await res.json();
             if(data.success) {
                 appState.currentWorld = data.world;
                 refreshGameUI();
-                alert("Aya: Deal successfully validated across the cloud server!");
             } else {
                 alert(data.error);
             }
         }
 
-        function switchTab(tabId, event) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            if(event) event.currentTarget.classList.add('active');
+        async function deleteUniverse() {
+            if(!confirm("Are you sure you want to delete this entire universe?")) return;
+            let adminName = prompt("Enter your Admin Name to confirm deletion:");
+            let res = await fetch(`${API_URL}/api/universes/${appState.currentWorld.id}`, {
+                method: 'DELETE', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ adminName })
+            });
+            let data = await res.json();
+            if(data.success) {
+                alert("Universe deleted successfully.");
+                location.reload();
+            } else {
+                alert(data.error);
+            }
         }
 
         async function adminAction(type) {
-            let worldId = appState.currentWorld.id;
-            let payload = {};
-            if(type === 'inject') {
-                payload = {
-                    action: 'inject',
-                    data: {
-                        name: document.getElementById('admin-p-name').value,
-                        pos: document.getElementById('admin-p-pos').value,
-                        ovr: parseInt(document.getElementById('admin-p-ovr').value),
-                        price: parseInt(document.getElementById('admin-p-price').value),
-                        age: 22
-                    }
-                };
-            } else if(type === 'tournament') {
-                payload = { action: 'tournament', data: { tournamentName: document.getElementById('admin-tourn-name').value } };
-            } else if(type === 'newsletter') {
-                payload = { action: 'newsletter', data: { text: document.getElementById('admin-newsletter-text').value } };
-            }
-
-            let res = await fetch(`${API_URL}/api/universes/${worldId}/admin`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            let payload = {
+                action: 'inject',
+                data: {
+                    name: document.getElementById('admin-p-name').value,
+                    pos: document.getElementById('admin-p-pos').value,
+                    ovr: parseInt(document.getElementById('admin-p-ovr').value),
+                    price: parseInt(document.getElementById('admin-p-price').value),
+                    age: 23
+                }
+            };
+            let res = await fetch(`${API_URL}/api/universes/${appState.currentWorld.id}/admin`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)
             });
             let data = await res.json();
             if(data.success) {
                 appState.currentWorld = data.world;
                 refreshGameUI();
-                alert("Admin command executed successfully on server!");
+                alert("Item injected!");
             }
         }
 
-        function simulateMatch() {
-            let world = appState.currentWorld;
-            let club = world.clubs[appState.clubKey];
-            const logBox = document.getElementById('match-log');
-            const simBtn = document.getElementById('sim-btn');
-            simBtn.disabled = true;
-            logBox.innerHTML = `[Kickoff] Matchday ${club.matchday} underway under Aya monitoring...<br>`;
-            
-            let minute = 0;
-            let interval = setInterval(() => {
-                minute += 15;
-                if (minute >= 90) {
-                    clearInterval(interval);
-                    logBox.innerHTML += `<span class="highlight-event">[Full Time] Match concluded. Gate receipts added.</span><br>`;
-                    club.matchday++;
-                    club.budget += Math.round(club.stadiumCap * 35);
-                    simBtn.disabled = false;
-                    refreshGameUI();
-                } else {
-                    logBox.innerHTML += `[${minute}'] Action unfolding on the pitch...<br>`;
-                }
-            }, 300);
+        function switchTab(tabId, event) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if(event) event.currentTarget.classList.add('active');
         }
 
-        function queryAya() {
-            let q = document.getElementById('aya-query-input').value;
-            let chatBox = document.getElementById('aya-chat-box');
-            chatBox.innerHTML += `<div><strong>You:</strong> ${q}</div><div class="aya-msg"><strong>[Aya]:</strong> All club metrics are verified under server ledger compliance.</div>`;
-            document.getElementById('aya-query-input').value = '';
-        }
-
-        function upgradeStadium() {
-            alert("Stadium upgrade request sent!");
-        }
-
-        // Initialize fetch on load
         fetchUniverses();
     </script>
 </body>
