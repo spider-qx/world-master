@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Master - Ultimate Football Universe</title>
+    <style>
+        :root {
+            --bg-deep: #070a13;
+            --bg-card: #101726;
+            --bg-hover: #1a243b;
+            --accent: #10b981;
+            --accent-glow: rgba(16, 185, 129, 0.25);
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #1e293b;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .club-stats { display: flex; gap: 12px; font-size: 0.85rem; }
+        .stat-badge {
+            background: var(--bg-deep);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .stat-badge span { color: var(--accent); font-weight: bold; }
+        
+        nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        nav button {
+            background: var(--bg-card);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        nav button.active, nav button:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
+        th { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        tr:hover td { background-color: var(--bg-hover); }
+
+        button.action-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.15s;
+        }
+        button.action-btn:hover { filter: brightness(1.15); }
+        button.secondary-btn {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        button.secondary-btn:hover { background: var(--bg-hover); }
+
+        select, input, textarea {
+            background: var(--bg-deep);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-family: inherit;
+            width: 100%;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        .chat-box {
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            height: 220px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+        .aya-msg { color: var(--info); margin-bottom: 8px; }
+        .admin-msg { color: var(--warning); margin-bottom: 8px; }
+        .match-log {
+            background: var(--bg-deep);
+            padding: 15px;
+            border-radius: 8px;
+            height: 240px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+        .highlight-event { color: #facc15; font-weight: bold; }
+        .goal-event { color: var(--accent); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- WORLD SELECTOR / CREATION MODAL -->
+    <div id="universe-screen" style="max-width: 600px; margin: 40px auto;" class="card">
+        <h2 style="margin-top:0; color:var(--accent);">🌍 World Master Universe Hub</h2>
+        <p style="color:var(--text-muted); font-size:0.9rem;">Join an existing football world or create a new universe as an Admin.</p>
+        
+        <div style="margin-top: 20px;">
+            <h3>Create a New World (Admin Portal)</h3>
+            <label>World Name</label>
+            <input type="text" id="new-world-name" placeholder="e.g. Global Super League">
+            <label>Admin Creator Name</label>
+            <input type="text" id="admin-name" placeholder="e.g. Spider23qX">
+            <button class="action-btn" onclick="createWorld()">Initialize Universe & Admin Club</button>
+        </div>
+
+        <hr style="border-color:var(--border); margin: 25px 0;">
+
+        <h3>Available Universes</h3>
+        <div id="world-list-container">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+
+    <!-- MAIN APP DASHBOARD -->
+    <div id="main-app-screen" style="display: none;">
+        <header>
+            <div>
+                <h1 id="header-club-name" style="margin:0; font-size: 1.4rem;">Apex FC</h1>
+                <span id="header-world-info" style="color: var(--text-muted); font-size: 0.85rem;">World: Default • Admin: Active</span>
+            </div>
+            <div class="club-stats">
+                <div class="stat-badge">Treasury: <span id="club-budget">£35M</span></div>
+                <div class="stat-badge">Stadium Cap: <span id="stadium-cap">40,000</span></div>
+                <div class="stat-badge">Matchday: <span id="matchday-counter">1</span> / 38</div>
+            </div>
+        </header>
+
+        <nav>
+            <button class="nav-btn active" onclick="switchTab('dashboard', event)">Club Hub</button>
+            <button class="nav-btn" onclick="switchTab('match', event)">Match & Tournaments</button>
+            <button class="nav-btn" onclick="switchTab('transfers', event)">Transfer & Coaches</button>
+            <button class="nav-btn" onclick="switchTab('stadium', event)">Stadium & Facilities</button>
+            <button class="nav-btn" onclick="switchTab('aya', event)">🤖 Aya & FA Laws</button>
+            <button class="nav-btn" onclick="switchTab('admin', event)" id="admin-nav-tab" style="display:none; color:var(--warning);">👑 Admin Dashboard</button>
+        </nav>
+
+        <!-- CLUB DASHBOARD TAB -->
+        <div id="dashboard" class="tab-content active">
+            <div class="grid-2">
+                <div class="card" style="margin:0;">
+                    <h3>Squad Roster</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Name</th><th>Pos</th><th>Age</th><th>OVR</th><th>Wage</th></tr>
+                        </thead>
+                        <tbody id="squad-list"></tbody>
+                    </table>
+                </div>
+                <div class="card" style="margin:0;">
+                    <h3>Coaching Staff & Management</h3>
+                    <p>Head Coach: <strong id="coach-name">Unassigned</strong> (<span id="coach-rating">0</span> Rating)</p>
+                    <p>Scout Director: <strong id="scout-name">Standard Network</strong></p>
+                    <button class="secondary-btn" style="margin-top:10px;" onclick="switchTab('transfers', event)">Hire Coaches</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MATCH & TOURNAMENTS TAB -->
+        <div id="match" class="tab-content">
+            <div class="card" style="text-align: center;">
+                <h2 id="fixture-title" style="margin-top:0;">Tournament Matchday 1</h2>
+                <p id="active-tournament-label" style="color:var(--text-muted);">Current Active Competition: World Master League Cup</p>
+                <button class="action-btn" id="sim-btn" style="font-size: 1rem; padding: 12px 28px;" onclick="simulateMatch()">Simulate Fixture Match</button>
+                
+                <div class="match-log" id="match-log">
+                    [System] Ready for kickoff. Check tactics and match parameters before starting.
+                </div>
+            </div>
+        </div>
+
+        <!-- TRANSFERS & COACHES TAB -->
+        <div id="transfers" class="tab-content">
+            <div class="card">
+                <h3>Aya Regulated Transfer Market (Players & Coaches)</h3>
+                <table>
+                    <thead>
+                        <tr><th>Name</th><th>Role / Pos</th><th>Age</th><th>OVR / Rating</th><th>Asking Price</th><th>Action</th></tr>
+                    </thead>
+                    <tbody id="transfer-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- STADIUM & FACILITIES TAB -->
+        <div id="stadium" class="tab-content">
+            <div class="grid-2">
+                <div class="card" style="margin:0;">
+                    <h3>Stadium Infrastructure</h3>
+                    <p>Current Capacity: <strong id="stadium-size">40,000</strong> Seats</p>
+                    <p>Ticket Price Tier: <strong>£35 / match</strong></p>
+                    <button class="action-btn" style="margin-top:15px;" onclick="upgradeStadium()">Expand Stadium (+10,000 Seats) - £10M</button>
+                </div>
+                <div class="card" style="margin:0;">
+                    <h3>Youth Academy & Training</h3>
+                    <p>Academy Level: <strong>Level 2</strong></p>
+                    <p>Training Grounds: <strong>Advanced</strong></p>
+                    <button class="secondary-btn" style="margin-top:15px;" onclick="alert('Youth facility is producing prospects weekly!')">Inspect Youth Intake</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AYA & FA LAWS TAB -->
+        <div id="aya" class="tab-content">
+            <div class="grid-2">
+                <div class="card" style="margin:0;">
+                    <h3>🤖 Aya — FA Regulatory & Intelligence AI</h3>
+                    <div class="chat-box" id="aya-chat-box">
+                        <div class="aya-msg"><strong>[Aya FA Bot]:</strong> Greetings, Manager. I monitor financial fair play, contract compliance, and league transfers across this world. All deals are locked under strict FA oversight.</div>
+                    </div>
+                    <input type="text" id="aya-query-input" placeholder="Ask Aya about club financial status or market rules...">
+                    <button class="action-btn" onclick="queryAya()">Consult Aya</button>
+                </div>
+                <div class="card" style="margin:0;">
+                    <h3>World Laws & Governance</h3>
+                    <div id="world-laws-display" style="background:var(--bg-deep); padding:15px; border-radius:8px; border:1px solid var(--border); font-size:0.9rem; line-height:1.5;">
+                        Loading world regulations...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN DASHBOARD TAB -->
+        <div id="admin" class="tab-content">
+            <div class="grid-2">
+                <div class="card" style="margin:0;">
+                    <h3 style="color:var(--warning);">👑 Admin Market Injector</h3>
+                    <p style="font-size:0.85rem; color:var(--text-muted);">Manually generate and inject players or coaches into the world transfer market.</p>
+                    <label>Entity Name</label>
+                    <input type="text" id="admin-p-name" placeholder="e.g. Lamine Yamal Jr">
+                    <label>Position / Role</label>
+                    <select id="admin-p-pos">
+                        <option>ST</option><option>RW</option><option>LW</option><option>CAM</option><option>CM</option><option>CB</option><option>GK</option><option>Head Coach</option>
+                    </select>
+                    <label>Overall / Rating</label>
+                    <input type="number" id="admin-p-ovr" value="84">
+                    <label>Asking Price (£)</label>
+                    <input type="number" id="admin-p-price" value="15000000">
+                    <button class="action-btn" style="background:var(--warning); color:#000;" onclick="adminInjectPlayer()">Inject into Market</button>
+                </div>
+                <div class="card" style="margin:0;">
+                    <h3 style="color:var(--warning);">📰 Newsletter & Tournament Creator</h3>
+                    <label>Tournament Name</label>
+                    <input type="text" id="admin-tourn-name" placeholder="e.g. World Super Cup 2026">
+                    <button class="action-btn" style="background:var(--warning); color:#000; margin-bottom:15px;" onclick="adminCreateTournament()">Create & Launch Tournament</button>
+                    
+                    <label>Draft World Newsletter / Announcement</label>
+                    <textarea id="admin-newsletter-text" rows="3" placeholder="Draft league news or disciplinary warnings here..."></textarea>
+                    <button class="action-btn" style="background:var(--warning); color:#000;" onclick="adminPublishNewsletter()">Publish to World Gazette</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Game App State
+        let appState = {
+            currentWorld: null,
+            currentUserClub: null,
+            isAdmin: false
+        };
+
+        // Mock Database of Universes (Stored in browser localStorage for multi-user simulation)
+        let universes = JSON.parse(localStorage.getItem('wm_universes')) || [
+            {
+                id: "default_world",
+                name: "Premier Elite Universe",
+                admin: "Spider23qX",
+                laws: "1. Financial Fair Play: Club wage bills cannot exceed 70% of turnover.\n2. Transfer Caps: Maximum single bid is £100M.\n3. Academy Mandate: Every club must register at least 2 U-19 homegrown players.",
+                activeTournament: "World Master League Cup",
+                newsletters: [
+                    "📰 [FA Gazette]: Welcome managers to the Premier Elite Universe. Aya is active and overseeing all transfers."
+                ],
+                transferMarket: [
+                    { id: 101, name: "Mateo Fernandez", pos: "RW", age: 21, ovr: 83, price: 16000000 },
+                    { id: 102, name: "Pep Lijnders", pos: "Head Coach", age: 43, ovr: 85, price: 5000000 },
+                    { id: 103, name: "Viktor Gyökeres", pos: "ST", age: 27, ovr: 86, price: 24000000 }
+                ],
+                clubs: {
+                    "apex_fc": {
+                        name: "Apex FC",
+                        owner: "Spider23qX",
+                        budget: 35000000,
+                        stadiumCap: 40000,
+                        matchday: 1,
+                        coach: { name: "Unassigned", rating: 0 },
+                        squad: [
+                            { name: "Marcus Vance", pos: "ST", age: 25, ovr: 85, wage: 55000 },
+                            { name: "Leo Silva", pos: "CAM", age: 23, ovr: 82, wage: 40000 },
+                            { name: "David Alaba Jr", pos: "CB", age: 28, ovr: 81, wage: 35000 },
+                            { name: "Kasper Schmeichel II", pos: "GK", age: 22, ovr: 79, wage: 25000 }
+                        ]
+                    }
+                }
+            }
+        ];
+
+        function saveUniverses() {
+            localStorage.setItem('wm_universes', JSON.stringify(universes));
+        }
+
+        function renderUniverseList() {
+            let container = document.getElementById('world-list-container');
+            let html = '';
+            universes.forEach(w => {
+                html += `<div style="background:var(--bg-deep); padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <strong>${w.name}</strong> <span style="font-size:0.8rem; color:var(--text-muted);">(Admin: ${w.admin})</span><br>
+                        <span style="font-size:0.8rem; color:var(--accent);">Active Tournament: ${w.activeTournament}</span>
+                    </div>
+                    <div>
+                        <button class="action-btn" onclick="joinWorld('${w.id}')">Join World</button>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function createWorld() {
+            let name = document.getElementById('new-world-name').value;
+            let admin = document.getElementById('admin-name').value;
+            if(!name || !admin) { alert("Please provide both World Name and Admin Name!"); return; }
+
+            let newId = "world_" + Date.now();
+            let newWorld = {
+                id: newId,
+                name: name,
+                admin: admin,
+                laws: "1. FFP Active: Maintain positive balances.\n2. Fair Bidding enforced by Aya.",
+                activeTournament: "Inaugural Universe Cup",
+                newsletters: [`📰 [FA Gazette]: Universe '${name}' has been created by ${admin}.`],
+                transferMarket: [
+                    { id: 201, name: "Mateo Fernandez", pos: "RW", age: 21, ovr: 83, price: 16000000 },
+                    { id: 202, name: "Mikel Arteta Jr", pos: "Head Coach", age: 44, ovr: 88, price: 7000000 }
+                ],
+                clubs: {}
+            };
+
+            universes.push(newWorld);
+            saveUniverses();
+            renderUniverseList();
+            alert("Universe created successfully! Now click 'Join World'.");
+        }
+
+        function joinWorld(worldId) {
+            let world = universes.find(w => w.id === worldId);
+            let managerName = prompt("Enter your Manager Name for this World:", "Manager_" + Math.floor(Math.random()*1000));
+            let clubName = prompt("Enter your Club Name:", managerName + " FC");
+            if(!managerName || !clubName) return;
+
+            let clubKey = clubName.toLowerCase().replace(/\s+/g, '_');
+            
+            if(!world.clubs[clubKey]) {
+                world.clubs[clubKey] = {
+                    name: clubName,
+                    owner: managerName,
+                    budget: 35000000,
+                    stadiumCap: 40000,
+                    matchday: 1,
+                    coach: { name: "Unassigned", rating: 0 },
+                    squad: [
+                        { name: "Starter Striker", pos: "ST", age: 24, ovr: 78, wage: 20000 },
+                        { name: "Starter Midfielder", pos: "CM", age: 26, ovr: 77, wage: 18000 },
+                        { name: "Starter Defender", pos: "CB", age: 25, ovr: 76, wage: 15000 },
+                        { name: "Starter Goalkeeper", pos: "GK", age: 23, ovr: 75, wage: 12000 }
+                    ]
+                };
+                saveUniverses();
+            }
+
+            appState.currentWorld = world;
+            appState.currentUserClub = clubKey;
+            appState.isAdmin = (managerName.toLowerCase() === world.admin.toLowerCase());
+
+            document.getElementById('universe-screen').style.display = 'none';
+            document.getElementById('main-app-screen').style.display = 'block';
+
+            if(appState.isAdmin) {
+                document.getElementById('admin-nav-tab').style.display = 'block';
+            }
+
+            refreshGameUI();
+        }
+
+        function refreshGameUI() {
+            let world = appState.currentWorld;
+            let club = world.clubs[appState.currentUserClub];
+
+            document.getElementById('header-club-name').innerText = club.name;
+            document.getElementById('header-world-info').innerText = `World: ${world.name} • Owner: ${club.owner} ${appState.isAdmin ? '(Admin)' : ''}`;
+            document.getElementById('club-budget').innerText = '£' + (club.budget / 1000000).toFixed(1) + 'M';
+            document.getElementById('stadium-cap').innerText = club.stadiumCap.toLocaleString();
+            document.getElementById('stadium-size').innerText = club.stadiumCap.toLocaleString();
+            document.getElementById('matchday-counter').innerText = club.matchday;
+            document.getElementById('coach-name').innerText = club.coach.name;
+            document.getElementById('coach-rating').innerText = club.coach.rating;
+            document.getElementById('active-tournament-label').innerText = `Current Competition: ${world.activeTournament}`;
+
+            // Render Squad
+            let squadHtml = '';
+            club.squad.forEach(p => {
+                squadHtml += `<tr><td><strong>${p.name}</strong></td><td>${p.pos}</td><td>${p.age}</td><td><span style="color:var(--accent); font-weight:bold;">${p.ovr}</span></td><td>£${p.wage.toLocaleString()}/w</td></tr>`;
+            });
+            document.getElementById('squad-list').innerHTML = squadHtml;
+
+            // Render Transfer Market
+            let marketHtml = '';
+            world.transferMarket.forEach(item => {
+                marketHtml += `<tr><td><strong>${item.name}</strong></td><td>${item.pos}</td><td>${item.age}</td><td>${item.ovr}</td><td>£${(item.price/1000000).toFixed(1)}M</td><td><button class="action-btn" onclick="buyMarketItem(${item.id})">Sign Deal</button></td></tr>`;
+            });
+            document.getElementById('transfer-list').innerHTML = marketHtml;
+
+            // Render Laws & Newsletters
+            document.getElementById('world-laws-display').innerHTML = `<strong>FA Governing Laws:</strong><br><pre style="white-space:pre-wrap; font-family:inherit; margin:5px 0 0 0;">${world.laws}</pre><br><hr style="border-color:var(--border)"><strong>World Gazette & Newsletters:</strong><br>` + world.newsletters.map(n => `<div style="margin-top:5px; color:var(--text-muted);">${n}</div>`).join('');
+        }
+
+        function switchTab(tabId, event) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if(event) event.currentTarget.classList.add('active');
+        }
+
+        function buyMarketItem(id) {
+            let world = appState.currentWorld;
+            let club = world.clubs[appState.currentUserClub];
+            let index = world.transferMarket.findIndex(i => i.id === id);
+            if(index === -1) return;
+
+            let item = world.transferMarket[index];
+            if(club.budget < item.price) {
+                alert("Aya (FA Regulator): Transfer denied! Insufficient club treasury funds.");
+                return;
+            }
+
+            club.budget -= item.price;
+            world.transferMarket.splice(index, 1);
+
+            if(item.pos === "Head Coach") {
+                club.coach = { name: item.name, rating: item.ovr };
+                alert(`Aya: Deal validated! ${item.name} has signed as Head Coach.`);
+            } else {
+                club.squad.push({ name: item.name, pos: item.pos, age: item.age, ovr: item.ovr, wage: Math.round(item.price * 0.002) });
+                alert(`Aya: Deal validated! ${item.name} has joined your first-team squad.`);
+            }
+
+            saveUniverses();
+            refreshGameUI();
+        }
+
+        function upgradeStadium() {
+            let world = appState.currentWorld;
+            let club = world.clubs[appState.currentUserClub];
+            let cost = 10000000;
+            if(club.budget < cost) { alert("Insufficient funds to expand stadium!"); return; }
+            club.budget -= cost;
+            club.stadiumCap += 10000;
+            saveUniverses();
+            refreshGameUI();
+            alert("Stadium expansion completed successfully!");
+        }
+
+        function simulateMatch() {
+            let world = appState.currentWorld;
+            let club = world.clubs[appState.currentUserClub];
+            const logBox = document.getElementById('match-log');
+            const simBtn = document.getElementById('sim-btn');
+            simBtn.disabled = true;
+            logBox.innerHTML = `[Kickoff] ${world.activeTournament} Matchday ${club.matchday} underway under Aya monitoring...<br>`;
+            
+            let minute = 0;
+            let interval = setInterval(() => {
+                minute += Math.floor(Math.random() * 15) + 5;
+                if (minute >= 90) {
+                    minute = 90;
+                    clearInterval(interval);
+                    logBox.innerHTML += `<span class="highlight-event">[Full Time] Match concluded. Matchday rewards processed.</span><br>`;
+                    club.matchday++;
+                    club.stadiumCap; // Gate receipts calculation
+                    let matchRevenue = Math.round(club.stadiumCap * 35);
+                    club.budget += matchRevenue;
+                    saveUniverses();
+                    simBtn.disabled = false;
+                    refreshGameUI();
+                } else {
+                    let events = [
+                        `⚽ <span class="goal-event">GOAL! Superb attacking buildup finishes in the back of the net!</span>`,
+                        `🟡 Aya issues a yellow card warning for tactical fouling.`,
+                        `❌ Close! Strike rattles against the woodwork.`,
+                        `🧤 Outstanding save by the goalkeeper to maintain defensive stability.`
+                    ];
+                    let randomEvent = events[Math.floor(Math.random() * events.length)];
+                    logBox.innerHTML += `[${minute}'] ${randomEvent}<br>`;
+                    logBox.scrollTop = logBox.scrollHeight;
+                }
+            }, 300);
+        }
+
+        function queryAya() {
+            let queryInput = document.getElementById('aya-query-input');
+            let chatBox = document.getElementById('aya-chat-box');
+            let q = queryInput.value.toLowerCase();
+            if(!q) return;
+
+            chatBox.innerHTML += `<div style="margin-bottom:8px;"><strong>You:</strong> ${queryInput.value}</div>`;
+            
+            let reply = "Aya: I am monitoring your club metrics. All financial fair play and transfer parameters are within normal legal limits.";
+            if(q.includes("budget") || q.includes("money")) {
+                let club = appState.currentWorld.clubs[appState.currentUserClub];
+                reply = `Aya: Your club treasury stands at £${(club.budget/1000000).toFixed(1)}M. Maintain a positive balance to avoid FA sanctions.`;
+            } else if(q.includes("rule") || q.includes("law")) {
+                reply = `Aya: World regulations require strict compliance with wage limits and transfer caps set by your universe admin.`;
+            }
+
+            chatBox.innerHTML += `<div class="aya-msg"><strong>[Aya FA Bot]:</strong> ${reply}</div>`;
+            queryInput.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Admin Functions
+        function adminInjectPlayer() {
+            let world = appState.currentWorld;
+            let name = document.getElementById('admin-p-name').value;
+            let pos = document.getElementById('admin-p-pos').value;
+            let ovr = parseInt(document.getElementById('admin-p-ovr').value);
+            let price = parseInt(document.getElementById('admin-p-price').value);
+
+            if(!name) { alert("Enter an entity name!"); return; }
+
+            world.transferMarket.push({ id: Date.now(), name, pos, age: pos === "Head Coach" ? 45 : 22, ovr, price });
+            saveUniverses();
+            refreshGameUI();
+            alert(`Admin Action: Successfully injected ${name} (${pos}) into the world transfer market.`);
+        }
+
+        function adminCreateTournament() {
+            let world = appState.currentWorld;
+            let tName = document.getElementById('admin-tourn-name').value;
+            if(!tName) return;
+            world.activeTournament = tName;
+            world.newsletters.unshift(`📰 [Tournament Announcement]: Admin has launched '${tName}' across the universe!`);
+            saveUniverses();
+            refreshGameUI();
+            alert(`Tournament '${tName}' is now active!`);
+        }
+
+        function adminPublishNewsletter() {
+            let world = appState.currentWorld;
+            let text = document.getElementById('admin-newsletter-text').value;
+            if(!text) return;
+            world.newsletters.unshift(`📰 [Admin Dispatch]: ${text}`);
+            saveUniverses();
+            refreshGameUI();
+            document.getElementById('admin-newsletter-text').value = '';
+            alert("Newsletter published to the World Gazette!");
+        }
+
+        // Initial load
+        renderUniverseList();
+    </script>
+</body>
+</html>
