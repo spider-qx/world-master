@@ -21,44 +21,14 @@
         body { font-family: system-ui, sans-serif; background-color: var(--bg-deep); color: var(--text-main); margin: 0; padding: 12px; }
         .app-container { max-width: 480px; margin: 0 auto; }
         
-        /* Splash Screen Animation Styling */
         #splash-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-deep);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            cursor: pointer;
-            transition: opacity 0.6s ease, visibility 0.6s ease;
-            text-align: center;
-            padding: 20px;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-deep); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9999; cursor: pointer; text-align: center; padding: 20px;
+            transition: opacity 0.6s ease;
         }
-        .splash-title {
-            color: var(--accent);
-            font-size: 2.2rem;
-            font-weight: 900;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-            animation: pulseGlow 2s infinite ease-in-out;
-        }
-        .splash-subtitle {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            animation: fadeInOut 2s infinite ease-in-out;
-        }
-        @keyframes pulseGlow {
-            0% { transform: scale(1); text-shadow: 0 0 10px rgba(16,185,129,0.2); }
-            50% { transform: scale(1.03); text-shadow: 0 0 25px var(--accent-glow); }
-            100% { transform: scale(1); text-shadow: 0 0 10px rgba(16,185,129,0.2); }
-        }
-        @keyframes fadeInOut {
-            0% { opacity: 0.4; }
-            50% { opacity: 1; }
-            100% { opacity: 0.4; }
-        }
+        .splash-title { color: var(--accent); font-size: 2.2rem; font-weight: 900; margin-bottom: 8px; }
+        .splash-subtitle { color: var(--text-muted); font-size: 0.9rem; }
 
         .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
         h2, h3 { margin-top: 0; color: var(--accent); }
@@ -82,7 +52,6 @@
 </head>
 <body>
 
-    <!-- SPLASH SCREEN ANIMATION OVERLAY -->
     <div id="splash-screen" onclick="dismissSplash()">
         <div class="splash-title">⚽ World Football Simulator</div>
         <div class="splash-subtitle">Tap anywhere to enter the arena</div>
@@ -92,7 +61,7 @@
         <!-- AUTH -->
         <div id="auth-screen" class="card">
             <h2>🏆 PvP Online Leagues</h2>
-            <p style="color:var(--text-muted); font-size:0.85rem;">Sign in to compete against other real managers in structured tournament schedules.</p>
+            <p style="color:var(--text-muted); font-size:0.85rem;">Sign in to compete against other real managers.</p>
             <label>Username</label><input type="text" id="auth-user" placeholder="Manager handle">
             <label>Password</label><input type="password" id="auth-pass" placeholder="Password">
             <div style="display: flex; gap: 8px; margin-top: 10px;">
@@ -101,7 +70,7 @@
             </div>
         </div>
 
-        <!-- UNIVERSE HUB -->
+        <!-- UNIVERSE / LEAGUE LOBBY -->
         <div id="universe-screen" class="card" style="display: none;">
             <h3 id="welcome-user-banner" style="color:var(--accent);">League Lobby</h3>
             <label>Create Custom PvP League</label>
@@ -110,6 +79,14 @@
             <hr style="border-color:var(--border);">
             <h3>Active Online Leagues</h3>
             <div id="world-list-container">Loading leagues...</div>
+        </div>
+
+        <!-- ADMIN APPLICATION / WAITING LOBBY -->
+        <div id="admin-claim-screen" class="card" style="display: none; border-color: var(--warning);">
+            <h3 style="color:var(--warning);">👑 League Administration Status</h3>
+            <p id="admin-status-text" style="font-size: 0.85rem; color: var(--text-muted);">Checking admin position availability...</p>
+            <div id="timer-display" style="font-size: 1.2rem; font-weight: bold; color: var(--accent); margin: 10px 0;">--:--</div>
+            <div id="admin-action-buttons"></div>
         </div>
 
         <!-- MAIN GAMEPLAY INTERFACE -->
@@ -130,7 +107,7 @@
                 <button class="nav-btn" onclick="switchTab('table', event)">Standings</button>
                 <button class="nav-btn" onclick="switchTab('fixtures', event)">PvP Fixtures</button>
                 <button class="nav-btn" onclick="switchTab('transfers', event)">Market</button>
-                <button class="nav-btn" onclick="switchTab('admin', event)" id="admin-nav-tab" style="display:none; color:var(--warning);">👑 Admin</button>
+                <button class="nav-btn" onclick="switchTab('admin-panel', event)" id="admin-nav-tab" style="display:none; color:var(--warning);">👑 Admin Lobby</button>
             </nav>
 
             <div id="dashboard" class="tab-content active">
@@ -157,11 +134,9 @@
                 </div>
             </div>
 
-            <!-- FIXTURES / PVP TOURNAMENT TAB -->
             <div id="fixtures" class="tab-content">
                 <div class="card">
                     <h3>🗓️ Tournament Fixture Schedule</h3>
-                    <p style="font-size:0.8rem; color:var(--text-muted);">Matches are automatically scheduled round-robin style between active human managers.</p>
                     <button class="action-btn" onclick="simulateMatchday()" style="margin-bottom: 12px;">Simulate Current Matchday</button>
                     <div id="fixtures-list-container">Loading fixtures...</div>
                 </div>
@@ -177,10 +152,41 @@
                 </div>
             </div>
 
-            <div id="admin" class="tab-content">
+            <!-- SEPARATE ADMIN LOBBY PANEL FOR CREATING PLAYERS & COACHES -->
+            <div id="admin-panel" class="tab-content">
                 <div class="card" style="border-color: var(--warning);">
-                    <h3 style="color:var(--warning);">👑 Admin Controls</h3>
-                    <button class="action-btn" style="background:var(--danger);" onclick="deleteUniverse()">Delete League Universe</button>
+                    <h3 style="color:var(--warning);">👑 Separate Admin Control Panel</h3>
+                    <p style="font-size:0.8rem; color:var(--text-muted);">As league administrator, you can create custom players and coaches with exact stats to inject into the live transfer market.</p>
+                    
+                    <label>Item Type</label>
+                    <select id="adm-item-type" onchange="toggleAdminFormFields()">
+                        <option value="player">Custom Player</option>
+                        <option value="coach">Head Coach</option>
+                    </select>
+
+                    <label>Full Name</label>
+                    <input type="text" id="adm-name" placeholder="e.g. Sergio Ramos Jr">
+
+                    <div id="adm-position-container">
+                        <label>Position</label>
+                        <select id="adm-pos">
+                            <option value="ST">ST - Striker</option>
+                            <option value="CM">CM - Midfielder</option>
+                            <option value="CB">CB - Defender</option>
+                            <option value="GK">GK - Goalkeeper</option>
+                        </select>
+                    </div>
+
+                    <label>Age</label>
+                    <input type="number" id="adm-age" value="24" min="16" max="45">
+
+                    <label>Overall Rating (OVR)</label>
+                    <input type="number" id="adm-ovr" value="85" min="50" max="99">
+
+                    <label>Market Price (£)</label>
+                    <input type="number" id="adm-price" value="15000000" step="1000000">
+
+                    <button class="action-btn" style="background:var(--warning); color:#000; margin-top:10px;" onclick="adminSubmitMarketItem()">Inject Into Transfer Market</button>
                 </div>
             </div>
         </div>
@@ -190,15 +196,12 @@
         const API_URL = "https://world-master-backend.onrender.com";
         let currentUser = null;
         let appState = { currentWorld: null, clubKey: null, isAdmin: false };
+        let timerInterval = null;
 
-        // Handle splash screen dismissal on tap
         function dismissSplash() {
             let splash = document.getElementById('splash-screen');
             splash.style.opacity = '0';
-            splash.style.visibility = 'hidden';
-            setTimeout(() => {
-                splash.style.display = 'none';
-            }, 600);
+            setTimeout(() => splash.style.display = 'none', 600);
         }
 
         async function userAuth(type) {
@@ -224,9 +227,10 @@
             let universes = await res.json();
             let html = '';
             universes.forEach(w => {
+                let statusBadge = w.admin ? `<span style="color:var(--accent);">Admin: ${w.admin}</span>` : `<span style="color:var(--warning);">Admin Vacant (Contestable)</span>`;
                 html += `<div style="background:var(--bg-deep); padding:10px; border-radius:8px; border:1px solid var(--border); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-                    <div><strong>${w.name}</strong><br><span style="font-size:0.7rem; color:var(--text-muted);">Admin: ${w.admin}</span></div>
-                    <button class="action-btn" style="width:auto; padding:6px 12px;" onclick="joinWorld('${w.id}')">Join League</button>
+                    <div><strong>${w.name}</strong><br>${statusBadge}</div>
+                    <button class="action-btn" style="width:auto; padding:6px 12px;" onclick="enterLeague('${w.id}')">Enter League</button>
                 </div>`;
             });
             document.getElementById('world-list-container').innerHTML = html || "No leagues available.";
@@ -235,17 +239,94 @@
         async function createWorld() {
             let name = document.getElementById('new-world-name').value;
             if(!name) return;
-            await fetch(`${API_URL}/api/universes`, {
+            let res = await fetch(`${API_URL}/api/universes`, {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ name, admin: currentUser })
+                body: JSON.stringify({ name, creator: currentUser })
             });
-            fetchUniverses();
+            let data = await res.json();
+            if(data.success) {
+                enterLeague(data.world.id);
+            }
         }
 
-        async function joinWorld(worldId) {
+        async function enterLeague(worldId) {
+            let res = await fetch(`${API_URL}/api/universes`);
+            let universes = await res.json();
+            appState.currentWorld = universes.find(w => w.id === worldId);
+
+            document.getElementById('universe-screen').style.display = 'none';
+            
+            // Check if admin is filled or if 2-minute timer is ongoing
+            if (!appState.currentWorld.admin) {
+                document.getElementById('admin-claim-screen').style.display = 'block';
+                startAdminTimer();
+            } else {
+                promptJoinClub();
+            }
+        }
+
+        function startAdminTimer() {
+            if(timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                let now = Date.now();
+                let timeLeft = appState.currentWorld.adminCandidateTimer - now;
+                let candidate = appState.currentWorld.adminCandidate;
+
+                let actionDiv = document.getElementById('admin-action-buttons');
+                let statusText = document.getElementById('admin-status-text');
+                let timerBox = document.getElementById('timer-display');
+
+                if (timeLeft <= 0) {
+                    timerBox.innerText = "00:00 - Timer Expired!";
+                    statusText.innerText = `No contests recorded. ${candidate} is eligible to claim permanent admin rights.`;
+                    actionDiv.innerHTML = `<button class="action-btn" onclick="claimAdminRole('${appState.currentWorld.id}')">Claim Admin Role Now</button>`;
+                } else {
+                    let mins = Math.floor(timeLeft / 60000);
+                    let secs = Math.floor((timeLeft % 60000) / 1000);
+                    timerBox.innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+                    statusText.innerText = `Current candidate: ${candidate}. If no one contests within 2 minutes, they become admin.`;
+                    
+                    if (candidate.toLowerCase() === currentUser.toLowerCase()) {
+                        actionDiv.innerHTML = `<p style="color:var(--accent); font-size:0.85rem;">You are currently holding the admin candidacy.</p>`;
+                    } else {
+                        actionDiv.innerHTML = `<button class="action-btn" style="background:var(--warning); color:#000;" onclick="contestAdminRole('${appState.currentWorld.id}')">Contest Admin Position</button>`;
+                    }
+                }
+            }, 1000);
+        }
+
+        async function claimAdminRole(worldId) {
+            let res = await fetch(`${API_URL}/api/universes/${worldId}/claim-admin`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username: currentUser })
+            });
+            let data = await res.json();
+            if(data.success) {
+                clearInterval(timerInterval);
+                appState.currentWorld = data.world;
+                document.getElementById('admin-claim-screen').style.display = 'none';
+                promptJoinClub();
+            } else { alert(data.error); }
+        }
+
+        async function contestAdminRole(worldId) {
+            let res = await fetch(`${API_URL}/api/universes/${worldId}/contest-admin`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username: currentUser })
+            });
+            let data = await res.json();
+            if(data.success) {
+                appState.currentWorld = data.world;
+                alert(data.message);
+                startAdminTimer();
+            } else { alert(data.error); }
+        }
+
+        async function promptJoinClub() {
             let clubName = prompt("Enter your Club Name (e.g., London United):");
             if(!clubName) return;
-            let res = await fetch(`${API_URL}/api/universes/${worldId}/join`, {
+            let res = await fetch(`${API_URL}/api/universes/${appState.currentWorld.id}/join`, {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ username: currentUser, clubName })
             });
@@ -254,9 +335,36 @@
                 appState.currentWorld = data.world;
                 appState.clubKey = data.clubKey;
                 appState.isAdmin = (currentUser.toLowerCase() === data.world.admin.toLowerCase());
-                document.getElementById('universe-screen').style.display = 'none';
                 document.getElementById('main-app-screen').style.display = 'block';
                 if(appState.isAdmin) document.getElementById('admin-nav-tab').style.display = 'block';
+                refreshGameUI();
+            } else { alert(data.error); }
+        }
+
+        function toggleAdminFormFields() {
+            let type = document.getElementById('adm-item-type').value;
+            document.getElementById('adm-position-container').style.display = (type === 'coach') ? 'none' : 'block';
+        }
+
+        async function adminSubmitMarketItem() {
+            let itemType = document.getElementById('adm-item-type').value;
+            let name = document.getElementById('adm-name').value;
+            let pos = document.getElementById('adm-pos').value;
+            let age = document.getElementById('adm-age').value;
+            let ovr = document.getElementById('adm-ovr').value;
+            let price = document.getElementById('adm-price').value;
+
+            if(!name) return alert("Please enter a name.");
+
+            let res = await fetch(`${API_URL}/api/universes/${appState.currentWorld.id}/admin/add-market-item`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username: currentUser, itemType, name, pos, age, ovr, price })
+            });
+            let data = await res.json();
+            if(data.success) {
+                appState.currentWorld = data.world;
+                alert("Successfully injected custom item into the transfer market!");
+                document.getElementById('adm-name').value = '';
                 refreshGameUI();
             } else { alert(data.error); }
         }
@@ -273,7 +381,7 @@
             document.getElementById('coach-rating').innerText = club.coach.rating;
 
             document.getElementById('squad-list').innerHTML = club.squad.map(p => `<tr><td>${p.name}</td><td>${p.pos}</td><td>${p.ovr}</td></tr>`).join('');
-            document.getElementById('transfer-list').innerHTML = world.transferMarket.map(item => `<tr><td>${item.name}</td><td>${item.pos}</td><td>${item.ovr}</td><td>£${(item.price/1000000).toFixed(1)}M</td><td><button class="action-btn" style="padding:4px 8px; width:auto;" onclick="buyItem(${item.id})">Sign</button></td></tr>`).join('');
+            document.getElementById('transfer-list').innerHTML = world.transferMarket.map(item => `<tr><td>${item.name} (${item.type === 'coach' ? 'Coach' : item.pos})</td><td>${item.age || '-'}</td><td>${item.ovr}</td><td>£${(item.price/1000000).toFixed(1)}M</td><td><button class="action-btn" style="padding:4px 8px; width:auto;" onclick="buyItem(${item.id})">Sign</button></td></tr>`).join('');
 
             let sortedClubs = Object.values(world.clubs).sort((a,b) => b.points - a.points || (b.gf - b.ga) - (a.gf - a.ga));
             document.getElementById('league-table-body').innerHTML = sortedClubs.map((c, i) => `<tr><td>${i+1}</td><td><strong>${c.name}</strong><br><span style="font-size:0.65rem; color:var(--text-muted);">Mgr: ${c.owner}</span></td><td>${c.played}</td><td>${c.won}</td><td>${c.drawn}</td><td>${c.lost}</td><td><strong>${c.points}</strong></td></tr>`).join('');
@@ -300,7 +408,7 @@
             if(data.success) {
                 appState.currentWorld = data.world;
                 refreshGameUI();
-                alert("Matchday successfully simulated across the tournament!");
+                alert("Matchday successfully simulated!");
             } else { alert(data.error); }
         }
 
@@ -312,12 +420,6 @@
             let data = await res.json();
             if(data.success) { appState.currentWorld = data.world; refreshGameUI(); }
             else alert(data.error);
-        }
-
-        async function deleteUniverse() {
-            if(!confirm("Delete league?")) return;
-            await fetch(`${API_URL}/api/universes/${appState.currentWorld.id}`, { method: 'DELETE' });
-            location.reload();
         }
 
         function switchTab(tabId, event) {
