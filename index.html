@@ -3,184 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Master - Football Universe</title>
+    <title>World Football Simulator - PvP Online League</title>
     <style>
         :root {
-            --bg-deep: #070a13;
-            --bg-card: #101726;
-            --bg-hover: #1a243b;
+            --bg-deep: #050811;
+            --bg-card: #0f172a;
             --accent: #10b981;
+            --accent-glow: rgba(16, 185, 129, 0.4);
             --danger: #ef4444;
             --warning: #f59e0b;
             --info: #3b82f6;
-            --text-main: #f1f5f9;
+            --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #1e293b;
         }
         * { box-sizing: border-box; }
-        body { font-family: system-ui, sans-serif; background-color: var(--bg-deep); color: var(--text-main); margin: 0; padding: 15px; }
-        header { display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); border: 1px solid var(--border); padding: 15px; border-radius: 12px; margin-bottom: 15px; }
-        .club-stats { display: flex; gap: 8px; font-size: 0.8rem; flex-wrap: wrap; }
-        .stat-badge { background: var(--bg-deep); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+        body { font-family: system-ui, sans-serif; background-color: var(--bg-deep); color: var(--text-main); margin: 0; padding: 12px; }
+        .app-container { max-width: 480px; margin: 0 auto; }
+        
+        /* Splash Screen Animation Styling */
+        #splash-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-deep);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            cursor: pointer;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+            text-align: center;
+            padding: 20px;
+        }
+        .splash-title {
+            color: var(--accent);
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+        .splash-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            animation: fadeInOut 2s infinite ease-in-out;
+        }
+        @keyframes pulseGlow {
+            0% { transform: scale(1); text-shadow: 0 0 10px rgba(16,185,129,0.2); }
+            50% { transform: scale(1.03); text-shadow: 0 0 25px var(--accent-glow); }
+            100% { transform: scale(1); text-shadow: 0 0 10px rgba(16,185,129,0.2); }
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+        h2, h3 { margin-top: 0; color: var(--accent); }
+        header { display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); border: 1px solid var(--border); padding: 14px; border-radius: 14px; margin-bottom: 14px; }
+        .club-stats { display: flex; gap: 6px; font-size: 0.75rem; }
+        .stat-badge { background: var(--bg-deep); padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); }
         .stat-badge span { color: var(--accent); font-weight: bold; }
-        nav { display: flex; gap: 6px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
-        nav button { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; white-space: nowrap; }
+        nav { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
+        nav button { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; white-space: nowrap; }
         nav button.active, nav button:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+        label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: bold; display: block; margin-top: 8px; }
+        select, input { background: var(--bg-deep); color: var(--text-main); border: 1px solid var(--border); padding: 10px; border-radius: 8px; width: 100%; margin-top: 4px; margin-bottom: 10px; }
+        button.action-btn { background: var(--accent); color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 0.9rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.85rem; }
         th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); }
         th { color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; }
-        button.action-btn { background: var(--accent); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        select, input, textarea { background: var(--bg-deep); color: var(--text-main); border: 1px solid var(--border); padding: 8px; border-radius: 6px; width: 100%; margin-top: 5px; margin-bottom: 10px; }
-        .match-log { background: var(--bg-deep); padding: 10px; border-radius: 6px; height: 180px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; border: 1px solid var(--border); margin-top: 10px; }
+        .match-card { background: var(--bg-deep); border: 1px solid var(--border); padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
 
-    <!-- UNIVERSE HUB -->
-    <div id="universe-screen" style="max-width: 500px; margin: 20px auto;" class="card">
-        <h2 style="margin-top:0; color:var(--accent);">🌍 World Master Hub</h2>
-        <p style="color:var(--text-muted); font-size:0.85rem;">Log in with your Manager & Club name to resume your game safely without resetting.</p>
-        
-        <div>
-            <h3>Create Universe (Admin)</h3>
-            <input type="text" id="new-world-name" placeholder="World Name">
-            <input type="text" id="admin-name" placeholder="Your Admin Name">
-            <button class="action-btn" onclick="createWorld()">Create Universe</button>
-        </div>
-
-        <hr style="border-color:var(--border); margin: 20px 0;">
-
-        <h3>Active Universes</h3>
-        <div id="world-list-container">Loading universes...</div>
+    <!-- SPLASH SCREEN ANIMATION OVERLAY -->
+    <div id="splash-screen" onclick="dismissSplash()">
+        <div class="splash-title">⚽ World Football Simulator</div>
+        <div class="splash-subtitle">Tap anywhere to enter the arena</div>
     </div>
 
-    <!-- MAIN APP -->
-    <div id="main-app-screen" style="display: none;">
-        <header>
-            <div>
-                <h1 id="header-club-name" style="margin:0; font-size: 1.2rem;">Club</h1>
-                <span id="header-world-info" style="color: var(--text-muted); font-size: 0.75rem;">World Info</span>
-            </div>
-            <div class="club-stats">
-                <div class="stat-badge">Budget: <span id="club-budget">£0</span></div>
-                <div class="stat-badge">Matchday: <span id="matchday-counter">1</span></div>
-            </div>
-        </header>
-
-        <nav>
-            <button class="nav-btn active" onclick="switchTab('dashboard', event)">Hub</button>
-            <button class="nav-btn" onclick="switchTab('table', event)">League Table</button>
-            <button class="nav-btn" onclick="switchTab('match', event)">Universal Matches</button>
-            <button class="nav-btn" onclick="switchTab('transfers', event)">Market</button>
-            <button class="nav-btn" onclick="switchTab('admin', event)" id="admin-nav-tab" style="display:none; color:var(--warning);">👑 Admin</button>
-        </nav>
-
-        <div id="dashboard" class="tab-content active">
-            <div class="card">
-                <h3>Squad Roster</h3>
-                <table>
-                    <thead><tr><th>Name</th><th>Pos</th><th>OVR</th></tr></thead>
-                    <tbody id="squad-list"></tbody>
-                </table>
-            </div>
-            <div class="card">
-                <h3>Head Coach</h3>
-                <p><span id="coach-name">Unassigned</span> (Rating: <span id="coach-rating">0</span>)</p>
+    <div class="app-container">
+        <!-- AUTH -->
+        <div id="auth-screen" class="card">
+            <h2>🏆 PvP Online Leagues</h2>
+            <p style="color:var(--text-muted); font-size:0.85rem;">Sign in to compete against other real managers in structured tournament schedules.</p>
+            <label>Username</label><input type="text" id="auth-user" placeholder="Manager handle">
+            <label>Password</label><input type="password" id="auth-pass" placeholder="Password">
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                <button class="action-btn" onclick="userAuth('login')">Log In</button>
+                <button class="action-btn" style="background:var(--info);" onclick="userAuth('register')">Register</button>
             </div>
         </div>
 
-        <div id="table" class="tab-content">
-            <div class="card">
-                <h3>Shared League Standings</h3>
-                <table>
-                    <thead><tr><th>Pos</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Pts</th></tr></thead>
-                    <tbody id="league-table-body"></tbody>
-                </table>
-            </div>
+        <!-- UNIVERSE HUB -->
+        <div id="universe-screen" class="card" style="display: none;">
+            <h3 id="welcome-user-banner" style="color:var(--accent);">League Lobby</h3>
+            <label>Create Custom PvP League</label>
+            <input type="text" id="new-world-name" placeholder="e.g. Elite Pro Tournament">
+            <button class="action-btn" onclick="createWorld()" style="margin-bottom:15px;">Create League</button>
+            <hr style="border-color:var(--border);">
+            <h3>Active Online Leagues</h3>
+            <div id="world-list-container">Loading leagues...</div>
         </div>
 
-        <div id="match" class="tab-content">
-            <div class="card" style="text-align: center;">
-                <h3 id="active-tournament-label">Competition</h3>
-                <p style="font-size: 0.85rem; color: var(--text-muted);">Simulate the universal matchday for all clubs in the universe.</p>
-                <button class="action-btn" onclick="simulateUniversalMatchday()">Simulate Universal Matchday</button>
-                <div class="match-log" id="match-log">Awaiting matchday execution...</div>
-            </div>
-        </div>
+        <!-- MAIN GAMEPLAY INTERFACE -->
+        <div id="main-app-screen" style="display: none;">
+            <header>
+                <div>
+                    <h1 id="header-club-name" style="margin:0; font-size: 1.1rem;">Club</h1>
+                    <span id="header-world-info" style="color: var(--text-muted); font-size: 0.7rem;">League Info</span>
+                </div>
+                <div class="club-stats">
+                    <div class="stat-badge">Funds: <span id="club-budget">£0</span></div>
+                    <div class="stat-badge">MD: <span id="matchday-counter">1</span></div>
+                </div>
+            </header>
 
-        <div id="transfers" class="tab-content">
-            <div class="card">
-                <h3>Shared Transfer Market</h3>
-                <table>
-                    <thead><tr><th>Name</th><th>Role</th><th>OVR</th><th>Price</th><th>Action</th></tr></thead>
-                    <tbody id="transfer-list"></tbody>
-                </table>
-            </div>
-        </div>
+            <nav>
+                <button class="nav-btn active" onclick="switchTab('dashboard', event)">Squad</button>
+                <button class="nav-btn" onclick="switchTab('table', event)">Standings</button>
+                <button class="nav-btn" onclick="switchTab('fixtures', event)">PvP Fixtures</button>
+                <button class="nav-btn" onclick="switchTab('transfers', event)">Market</button>
+                <button class="nav-btn" onclick="switchTab('admin', event)" id="admin-nav-tab" style="display:none; color:var(--warning);">👑 Admin</button>
+            </nav>
 
-        <div id="admin" class="tab-content">
-            <div class="card" style="border-color: var(--warning);">
-                <h3 style="color:var(--warning);">👑 Admin Controls</h3>
-                <button class="action-btn" style="background:var(--danger); width:100%; margin-bottom:15px;" onclick="deleteUniverse()">Delete This Universe</button>
-                
-                <label>Inject Market Item</label>
-                <input type="text" id="admin-p-name" placeholder="Player Name">
-                <select id="admin-p-pos"><option>ST</option><option>RW</option><option>CM</option><option>CB</option><option>GK</option><option>Head Coach</option></select>
-                <input type="number" id="admin-p-ovr" value="84" placeholder="OVR">
-                <input type="number" id="admin-p-price" value="15000000" placeholder="Price">
-                <button class="action-btn" style="background:var(--warning); color:#000;" onclick="adminAction('inject')">Inject Item</button>
+            <div id="dashboard" class="tab-content active">
+                <div class="card">
+                    <h3>Squad Roster</h3>
+                    <table>
+                        <thead><tr><th>Player</th><th>Pos</th><th>OVR</th></tr></thead>
+                        <tbody id="squad-list"></tbody>
+                    </table>
+                </div>
+                <div class="card">
+                    <h3>Head Coach</h3>
+                    <p style="margin:0; font-size:0.85rem;"><span id="coach-name" style="color:var(--accent); font-weight:bold;">Unassigned</span> (Rating: <span id="coach-rating">70</span>)</p>
+                </div>
+            </div>
+
+            <div id="table" class="tab-content">
+                <div class="card">
+                    <h3>Tournament Standings</h3>
+                    <table>
+                        <thead><tr><th>Pos</th><th>Club (Manager)</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Pts</th></tr></thead>
+                        <tbody id="league-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- FIXTURES / PVP TOURNAMENT TAB -->
+            <div id="fixtures" class="tab-content">
+                <div class="card">
+                    <h3>🗓️ Tournament Fixture Schedule</h3>
+                    <p style="font-size:0.8rem; color:var(--text-muted);">Matches are automatically scheduled round-robin style between active human managers.</p>
+                    <button class="action-btn" onclick="simulateMatchday()" style="margin-bottom: 12px;">Simulate Current Matchday</button>
+                    <div id="fixtures-list-container">Loading fixtures...</div>
+                </div>
+            </div>
+
+            <div id="transfers" class="tab-content">
+                <div class="card">
+                    <h3>Transfer Market</h3>
+                    <table>
+                        <thead><tr><th>Name</th><th>Role</th><th>OVR</th><th>Price</th><th>Action</th></tr></thead>
+                        <tbody id="transfer-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="admin" class="tab-content">
+                <div class="card" style="border-color: var(--warning);">
+                    <h3 style="color:var(--warning);">👑 Admin Controls</h3>
+                    <button class="action-btn" style="background:var(--danger);" onclick="deleteUniverse()">Delete League Universe</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         const API_URL = "https://world-master-backend.onrender.com";
+        let currentUser = null;
         let appState = { currentWorld: null, clubKey: null, isAdmin: false };
+
+        // Handle splash screen dismissal on tap
+        function dismissSplash() {
+            let splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
+            splash.style.visibility = 'hidden';
+            setTimeout(() => {
+                splash.style.display = 'none';
+            }, 600);
+        }
+
+        async function userAuth(type) {
+            let username = document.getElementById('auth-user').value;
+            let password = document.getElementById('auth-pass').value;
+            if(!username || !password) return alert("Fill out fields.");
+            let res = await fetch(`${API_URL}/api/auth/${type}`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username, password })
+            });
+            let data = await res.json();
+            if(data.success) {
+                currentUser = data.username || username;
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('universe-screen').style.display = 'block';
+                document.getElementById('welcome-user-banner').innerText = `Welcome, Manager ${currentUser}`;
+                fetchUniverses();
+            } else { alert(data.error); }
+        }
 
         async function fetchUniverses() {
             let res = await fetch(`${API_URL}/api/universes`);
             let universes = await res.json();
             let html = '';
             universes.forEach(w => {
-                html += `<div style="background:var(--bg-deep); padding:10px; border-radius:6px; border:1px solid var(--border); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-                    <div><strong>${w.name}</strong> <span style="font-size:0.75rem; color:var(--text-muted);">(Admin: ${w.admin})</span></div>
-                    <button class="action-btn" onclick="joinWorld('${w.id}')">Enter Club</button>
+                html += `<div style="background:var(--bg-deep); padding:10px; border-radius:8px; border:1px solid var(--border); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <div><strong>${w.name}</strong><br><span style="font-size:0.7rem; color:var(--text-muted);">Admin: ${w.admin}</span></div>
+                    <button class="action-btn" style="width:auto; padding:6px 12px;" onclick="joinWorld('${w.id}')">Join League</button>
                 </div>`;
             });
-            document.getElementById('world-list-container').innerHTML = html || "No universes found.";
+            document.getElementById('world-list-container').innerHTML = html || "No leagues available.";
         }
 
         async function createWorld() {
             let name = document.getElementById('new-world-name').value;
-            let admin = document.getElementById('admin-name').value;
-            if(!name || !admin) return alert("Fill out fields.");
-            await fetch(`${API_URL}/api/universes`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name, admin}) });
+            if(!name) return;
+            await fetch(`${API_URL}/api/universes`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name, admin: currentUser })
+            });
             fetchUniverses();
         }
 
         async function joinWorld(worldId) {
-            let managerName = prompt("Enter your Manager Name:");
-            let clubName = prompt("Enter your Club Name:");
-            if(!managerName || !clubName) return;
-
+            let clubName = prompt("Enter your Club Name (e.g., London United):");
+            if(!clubName) return;
             let res = await fetch(`${API_URL}/api/universes/${worldId}/join`, {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ managerName, clubName })
+                body: JSON.stringify({ username: currentUser, clubName })
             });
             let data = await res.json();
             if(data.success) {
                 appState.currentWorld = data.world;
                 appState.clubKey = data.clubKey;
-                appState.isAdmin = (managerName.toLowerCase() === data.world.admin.toLowerCase());
-
+                appState.isAdmin = (currentUser.toLowerCase() === data.world.admin.toLowerCase());
                 document.getElementById('universe-screen').style.display = 'none';
                 document.getElementById('main-app-screen').style.display = 'block';
                 if(appState.isAdmin) document.getElementById('admin-nav-tab').style.display = 'block';
                 refreshGameUI();
-            }
+            } else { alert(data.error); }
         }
 
         function refreshGameUI() {
@@ -188,37 +266,42 @@
             let club = world.clubs[appState.clubKey];
 
             document.getElementById('header-club-name').innerText = club.name;
-            document.getElementById('header-world-info').innerText = `World: ${world.name} • Manager: ${club.owner}`;
+            document.getElementById('header-world-info').innerText = `${world.name} • MD ${world.matchday}`;
             document.getElementById('club-budget').innerText = '£' + (club.budget / 1000000).toFixed(1) + 'M';
             document.getElementById('matchday-counter').innerText = world.matchday;
             document.getElementById('coach-name').innerText = club.coach.name;
             document.getElementById('coach-rating').innerText = club.coach.rating;
-            document.getElementById('active-tournament-label').innerText = world.activeTournament;
 
-            // Squad list
             document.getElementById('squad-list').innerHTML = club.squad.map(p => `<tr><td>${p.name}</td><td>${p.pos}</td><td>${p.ovr}</td></tr>`).join('');
+            document.getElementById('transfer-list').innerHTML = world.transferMarket.map(item => `<tr><td>${item.name}</td><td>${item.pos}</td><td>${item.ovr}</td><td>£${(item.price/1000000).toFixed(1)}M</td><td><button class="action-btn" style="padding:4px 8px; width:auto;" onclick="buyItem(${item.id})">Sign</button></td></tr>`).join('');
 
-            // Transfer market
-            document.getElementById('transfer-list').innerHTML = world.transferMarket.map(item => `<tr><td>${item.name}</td><td>${item.pos}</td><td>${item.ovr}</td><td>£${(item.price/1000000).toFixed(1)}M</td><td><button class="action-btn" onclick="buyItem(${item.id})">Sign</button></td></tr>`).join('');
-
-            // League Table
             let sortedClubs = Object.values(world.clubs).sort((a,b) => b.points - a.points || (b.gf - b.ga) - (a.gf - a.ga));
-            document.getElementById('league-table-body').innerHTML = sortedClubs.map((c, index) => `<tr><td>${index+1}</td><td><strong>${c.name}</strong></td><td>${c.played}</td><td>${c.won}</td><td>${c.drawn}</td><td>${c.lost}</td><td><strong>${c.points}</strong></td></tr>`).join('');
+            document.getElementById('league-table-body').innerHTML = sortedClubs.map((c, i) => `<tr><td>${i+1}</td><td><strong>${c.name}</strong><br><span style="font-size:0.65rem; color:var(--text-muted);">Mgr: ${c.owner}</span></td><td>${c.played}</td><td>${c.won}</td><td>${c.drawn}</td><td>${c.lost}</td><td><strong>${c.points}</strong></td></tr>`).join('');
 
-            // Match logs
-            document.getElementById('match-log').innerText = world.matchesLog.join('\n\n') || "No matches simulated yet.";
+            let fixturesHtml = '';
+            if(world.fixtures && world.fixtures.length > 0) {
+                world.fixtures.forEach(f => {
+                    fixturesHtml += `<div style="margin-bottom: 10px; font-size:0.8rem; color:var(--accent);">Matchday ${f.matchday}</div>`;
+                    f.matches.forEach(m => {
+                        let hName = world.clubs[m.home] ? world.clubs[m.home].name : m.home;
+                        let aName = world.clubs[m.away] ? world.clubs[m.away].name : m.away;
+                        fixturesHtml += `<div class="match-card"><span>${hName}</span> <strong>${m.played ? m.score : 'vs'}</strong> <span>${aName}</span></div>`;
+                    });
+                });
+            } else {
+                fixturesHtml = "Waiting for at least 2 managers to join to generate tournament fixtures.";
+            }
+            document.getElementById('fixtures-list-container').innerHTML = fixturesHtml;
         }
 
-        async function simulateUniversalMatchday() {
-            let res = await fetch(`${API_URL}/api/universes/${appState.currentWorld.id}/simulate`, { method: 'POST' });
+        async function simulateMatchday() {
+            let res = await fetch(`${API_URL}/api/universes/${appState.currentWorld.id}/simulate-matchday`, { method: 'POST' });
             let data = await res.json();
             if(data.success) {
                 appState.currentWorld = data.world;
                 refreshGameUI();
-                alert("Matchday successfully simulated across the server!");
-            } else {
-                alert(data.error);
-            }
+                alert("Matchday successfully simulated across the tournament!");
+            } else { alert(data.error); }
         }
 
         async function buyItem(itemId) {
@@ -227,51 +310,14 @@
                 body: JSON.stringify({ clubKey: appState.clubKey, itemId })
             });
             let data = await res.json();
-            if(data.success) {
-                appState.currentWorld = data.world;
-                refreshGameUI();
-            } else {
-                alert(data.error);
-            }
+            if(data.success) { appState.currentWorld = data.world; refreshGameUI(); }
+            else alert(data.error);
         }
 
         async function deleteUniverse() {
-            if(!confirm("Are you sure you want to delete this entire universe?")) return;
-            let adminName = prompt("Enter your Admin Name to confirm deletion:");
-            let res = await fetch(`${API_URL}/api/universes/${appState.currentWorld.id}`, {
-                method: 'DELETE', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ adminName })
-            });
-            let data = await res.json();
-            if(data.success) {
-                alert("Universe deleted successfully.");
-                location.reload();
-            } else {
-                alert(data.error);
-            }
-        }
-
-        async function adminAction(type) {
-            let payload = {
-                action: 'inject',
-                data: {
-                    name: document.getElementById('admin-p-name').value,
-                    pos: document.getElementById('admin-p-pos').value,
-                    ovr: parseInt(document.getElementById('admin-p-ovr').value),
-                    price: parseInt(document.getElementById('admin-p-price').value),
-                    age: 23
-                }
-            };
-            let res = await fetch(`${API_URL}/api/universes/${appState.currentWorld.id}/admin`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
-            let data = await res.json();
-            if(data.success) {
-                appState.currentWorld = data.world;
-                refreshGameUI();
-                alert("Item injected!");
-            }
+            if(!confirm("Delete league?")) return;
+            await fetch(`${API_URL}/api/universes/${appState.currentWorld.id}`, { method: 'DELETE' });
+            location.reload();
         }
 
         function switchTab(tabId, event) {
@@ -280,8 +326,6 @@
             document.getElementById(tabId).classList.add('active');
             if(event) event.currentTarget.classList.add('active');
         }
-
-        fetchUniverses();
     </script>
 </body>
 </html>
